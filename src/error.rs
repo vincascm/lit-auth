@@ -17,12 +17,6 @@ pub enum Error {
     #[error(transparent)]
     Sqlx(#[from] sqlx::Error),
 
-    #[error("Argon2 error: {0}")]
-    Argon2(String),
-
-    #[error(transparent)]
-    Cookie(#[from] cookie::KeyError),
-
     #[error(transparent)]
     SerdeJson(#[from] serde_json::Error),
 
@@ -43,12 +37,12 @@ pub enum Error {
 
     #[error(transparent)]
     Redis(#[from] redis::RedisError),
-}
 
-impl From<argon2::password_hash::Error> for Error {
-    fn from(err: argon2::password_hash::Error) -> Self {
-        Error::Argon2(err.to_string())
-    }
+    #[error(transparent)]
+    Argon2Phc(#[from] argon2::password_hash::phc::Error),
+
+    #[error(transparent)]
+    Argon2(#[from] argon2::password_hash::Error),
 }
 
 impl Error {

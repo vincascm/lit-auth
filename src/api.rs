@@ -1,7 +1,4 @@
-use argon2::{
-    Argon2, PasswordHasher,
-    password_hash::{PasswordHash, PasswordVerifier, SaltString, rand_core::OsRng},
-};
+use argon2::{Argon2, PasswordHash, PasswordHasher, password_hash::PasswordVerifier};
 use atlas::http_api::{err, ok};
 use axum::{
     Json, Router,
@@ -46,9 +43,8 @@ pub async fn register(Json(req): Json<UserFromPage>) -> R<()> {
         return err(400, "this username is already in use.");
     }
 
-    let salt = SaltString::generate(&mut OsRng);
     let password_hash = Argon2::default()
-        .hash_password(req.password.as_bytes(), &salt)?
+        .hash_password(req.password.as_bytes())?
         .to_string();
 
     User::create(&req.username, &password_hash).await?;
@@ -61,7 +57,6 @@ pub async fn login(jar: CookieJar, Json(req): Json<UserFromPage>) -> Result<impl
         .ok_or_else(|| Error::new(401, "Invalid username or password"))?;
 
     let parsed_hash = PasswordHash::new(&user.password_hash)?;
-
     let valid = Argon2::default()
         .verify_password(req.password.as_bytes(), &parsed_hash)
         .is_ok();
