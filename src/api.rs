@@ -9,7 +9,7 @@ use axum::{
     routing::{get, post},
 };
 use axum_extra::extract::CookieJar;
-use cookie::{Cookie, time::Duration};
+use cookie::{Cookie, CookieBuilder, time::Duration};
 use redis::AsyncTypedCommands;
 use serde::Deserialize;
 
@@ -71,25 +71,25 @@ pub async fn login(jar: CookieJar, Json(req): Json<UserFromPage>) -> Result<impl
     }
 
     let key = Redis::set_session(&user.id.to_string()).await?;
-
-    ok(()).map(|resp| {
-        let cookie = Cookie::build(("token", key))
-            .secure(true)
-            .http_only(true)
-            .max_age(Duration::days(SESSION_EXPIRE))
-            .path("/");
-        (jar.add(cookie), resp)
-    })
+    ok(()).map(|resp| (jar.add(cookie(key, Duration::days(SESSION_EXPIRE))), resp))
 }
 
 pub async fn logout(jar: CookieJar) -> Result<impl IntoResponse> {
     match jar.get("token") {
         Some(token) => {
             Redis::del_session(token.value()).await?;
-            ok(()).map(|r| (jar.remove(Cookie::build(("token", "")).path("/")), r))
+            ok(()).map(|r| (jar.add(cookie(String::new(), Duration::seconds(0))), r))
         }
         None => Err(Error::new(401, "require to login")),
     }
+}
+
+fn cookie(key: String, max_age: Duration) -> CookieBuilder<'static> {
+    Cookie::build(("token", key))
+        .secure(true)
+        .http_only(true)
+        .max_age(max_age)
+        .path("/")
 }
 
 struct Redis;

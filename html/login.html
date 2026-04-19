@@ -58,7 +58,7 @@
 
                             const urlParams = new URLSearchParams(window.location.search);
                             const fromPage = urlParams.get('from_page') || '/';
-                            setTimeout(() => window.location.href = fromPage, 2000);
+                            setTimeout(() => window.location.href = fromPage, 1500);
                         } else {
                             this.message = data.message || 'Login failed';
                             this.messageType = 'error';
