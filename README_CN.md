@@ -112,9 +112,3 @@ server {
     ```bash
     cargo run -- config.toml
     ```
-
-## 静态页面
-
-`lit-auth` 自带了简单的 HTML 页面（位于 `html/` 目录）：
-- `login.html`: 登录页
-- `register.html`: 注册页

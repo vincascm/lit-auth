@@ -69,7 +69,7 @@ server {
             local redis = require "resty.redis"
             local red = redis:new()
             red:set_timeouts(1000, 1000, 1000)
-            
+
             local ok, err = red:connect("127.0.0.1", 6379)
             if not ok then
                 ngx.status = 500
@@ -111,9 +111,3 @@ server {
     ```bash
     cargo run -- config.toml
     ```
-
-## Static Pages
-
-`lit-auth` comes with simple HTML pages (located in the `html/` directory):
-- `login.html`: Login page
-- `register.html`: Registration page
